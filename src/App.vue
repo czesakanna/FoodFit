@@ -18,6 +18,5 @@
 </script>
 
 <style scoped>
-
     .styl { color: rgb(87, 147, 177) }
 </style>
