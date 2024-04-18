@@ -1,22 +1,37 @@
 <template>
-    <h1 class="styl">{{ appName }}</h1>
-    <h2 v-html="'Liczba brakujących kalorii: <b>' + proudctsNumber + '</b>'"></h2>
-    <p v-text="'Twoje zapotrzebowanie kaloryczne: ' + product.name + ' ' +  product.price"></p>
+    <div id="app">
+        <router-view></router-view>
+    </div>
 </template>
 
-<script setup>
-    import { ref, reactive } from "https://unpkg.com/vue/dist/vue.esm-browser.js"       
-    const appName = ref('FoodFit')
-    const proudctsNumber = ref(1500)
+<script setup></script>
 
-    const product = reactive({
-        name: 'kcal',
-        price: 2000
-    })
-    product.price++
-    const variable = "przykładowa"
-</script>
 
-<style scoped>
-    .styl { color: rgb(87, 147, 177) }
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&display=swap');
+
+/* Resetowanie marginesów dla body */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Jost', sans-serif; /* Ustawienie czcionki dla całej strony */
+}
+
+/* Ustawienie obrazka tła */
+#app {
+  background-image: url('./assets/background_image.png');
+  background-size: cover; /* Dopasowuje obrazek tak, aby wypełniał całe tło */
+  background-position: center; /* Wyśrodkowuje obrazek */
+  background-repeat: no-repeat; /* Zapobiega powtarzaniu obrazka */
+  width: 100vw; /* Szerokość będzie równa szerokości okna przeglądarki */
+  height: 100vh; /* Wysokość będzie równa wysokości okna przeglądarki */
+}
+
+/* Dodatkowe style dla czcionki Jost */
+@font-face {
+  font-family: 'Jost';
+  src: url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&display=swap') format('truetype');
+  /* Dodaj tutaj inne formaty czcionki, jeśli są dostępne */
+}
+
 </style>
