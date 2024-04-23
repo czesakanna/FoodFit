@@ -8,7 +8,7 @@
                 fontSize: '24px',
                 color: '#2f7d28',
                 alignSelf: 'flex-start',
-                fontWeight: 'lighter',
+                fontWeight: 300
             }"
         >
             Kalkulator kalorii
@@ -18,7 +18,7 @@
                 fontSize: '24px',
                 color: '#black',
                 alignSelf: 'flex-start',
-                fontWeight: 'lighter',
+                fontWeight: 200
             }"
         >
             Uzupełnij dane, a my obliczymy Twoje zapotrzebowanie kaloryczne:
@@ -31,7 +31,10 @@
             ></select-component>
         </div>
         <div class="input-box">
-            <input-field name="age" label="wiek"></input-field>
+            <input-field 
+                name="age" 
+                label="wiek"
+            ></input-field>
             <input-field
                 name="weight"
                 label="waga (kg)"
@@ -48,16 +51,19 @@
                 name="work_activity_level"
                 placeholder="poziom aktywności w pracy"
                 minWidth="300px"
+                :options="this.workActivityLevelOptions"
             ></select-component>
             <select-component
                 name="freetime_activity_level"
                 placeholder="poziom aktywności w wolnym czasie"
                 minWidth="300px"
+                :options="this.freeTimeActivityLevelOptions"
             ></select-component>
             <select-component
                 name="diet_goal"
                 placeholder="cel diety"
                 minWidth="300px"
+                :options="this.dietGoalOptions"
             ></select-component>
         </div>
         <div>
@@ -65,13 +71,14 @@
                 name="Oblicz"
                 minWidthBtn="104px"
                 minHeightBtn="43px"
+                @click="calculate"
             ></submit-button>
         </div>
         <div
             :style="{
                 alignItems: 'center',
                 marginTop: '1rem',
-                fontWeight: 'lighter',
+                fontWeight: 300,
                 fontSize: '24px',
             }"
         >
@@ -81,15 +88,14 @@
         <div
             :style="{
                 alignItems: 'center',
-                fontWeight: 'lighter',
+                fontWeight: 300,
                 fontSize: '32px',
             }"
         >
-            1500 kcl
+        {{ caloricDemand }}
         </div>
     </div>
 </template>
-
 <script>
 import AppNameText from "../textComponents/AppNameText.vue";
 import SelectComponent from "../inputComponents/SelectComponent.vue";
@@ -103,11 +109,38 @@ export default {
         "input-field": InputField,
         "submit-button": SubmitButton,
     },
+    
+    methods: {
+        calculate (){
+            this.caloricDemand ++;
+            //pobrac dane z inputów i podstawić pod wzór
+        }
+    },
+    
     data() {
         return {
+            caloricDemand: 0,
             sexOptions: [
                 { label: "mężczyzna", value: "male" },
                 { label: "kobieta", value: "female" },
+            ],
+            workActivityLevelOptions: [
+                { label: "bardzo lekka - np. praca przed komputerem, kierowca", value: "sedentary" },
+                { label: "lekka - np. lekka praca przemysłowa, sprzedaż", value: "lowActive" },
+                { label: "umiarkowana - np. sprzątanie, praca w kuchni", value: "active" },
+                { label: "ciężka - np. przemysł, prace budowlane lub rolnictwo", value: "veryActive" },
+            ],
+            freeTimeActivityLevelOptions: [
+                { label: "bardzo lekka - brak aktywności w wolnym czasie", value: "sedentary" },
+                { label: "lekka - np. raz w tygodniu spaceruje, pracuję w ogródku", value: "lowActive" },
+                { label: "umiarkowana - reguralnie ćwiczę min. raz w tygodniu ", value: "active" },
+                { label: "duża - reguralnie ćwiczę więcej niż raz w tygodniu", value: "veryActive" },
+                { label: "intensywna - ciężka aktywności fizyczna kilka razy w tygodniu", value: "extremelyActive" },
+            ],
+            dietGoalOptions: [
+                { label: "chcę schudnąć", value: "deficit" },
+                { label: "chcę utrzymać wagę", value: "maintenance" },
+                { label: "chcę przytyć", value: "surplus" },
             ],
         };
     },

@@ -106,5 +106,9 @@ export default {
     border-radius: 10px;
     color: #2f7d28;
     font-weight: lighter;
+    max-width: 310px;
+    overflow:hidden; 
+    white-space:nowrap; 
+    text-overflow:ellipsis;
 }
 </style>
