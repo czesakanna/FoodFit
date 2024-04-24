@@ -7,49 +7,23 @@
                 :id="name"
                 :type="type"
                 :placeholder="placeholder"
-                v-model="inputValue"
-                @input="emitInput"
+                v-model="modelValue"
             />
         </div>
     </div>
 </template>
 
-<script>
-export default {
-    props: {
-        name: {
-            type: String,
-            required: true,
-        },
-        label: {
-            type: String,
-            default: "",
-        },
-        type: {
-            type: String,
-            default: "text",
-        },
-        placeholder: {
-            type: String,
-            default: "",
-        },
-        value: {
-            // Prop do przekazania początkowej wartości pola wejściowego
-            required: false,
-        },
-    },
-    data() {
-        return {
-            inputValue: this.value || "", // Inicjalizacja wartości pola wejściowego
-        };
-    },
-    methods: {
-        emitInput() {
-            // Emitowanie zdarzenia input z aktualną wartością pola wejściowego
-            this.$emit("input", this.inputValue);
-        },
-    },
-};
+<script setup>
+    import { defineProps} from "vue";
+    //jezeli zmienilibysmy nazwe z modelValue to przestanie działać
+    const props = defineProps([
+        "value",
+        "name",
+        "label",
+        "type",
+        "placeholder",
+    ]);
+    
 </script>
 
 <style scoped>
@@ -72,7 +46,6 @@ export default {
     color: #2f7d28;
     font-weight: 300;
     text-align: left;
-
 }
 
 .input-field input {
