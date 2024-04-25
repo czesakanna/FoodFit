@@ -6,7 +6,6 @@
                 class="input"
                 :id="name"
                 v-model="selectedValue"
-                @change="emitChange"
                 :style="{ minWidth: computedMinWidth }"
             >
                 <option :value="placeholder" disabled selected>
@@ -61,11 +60,6 @@ export default {
     computed: {
         computedMinWidth() {
             return this.minWidth;
-        },
-    },
-    methods: {
-        emitChange() {
-            this.$emit("change", this.selectedValue);
         },
     },
 };
