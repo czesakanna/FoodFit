@@ -99,14 +99,6 @@
         >
             Twoje zapotrzebowanie kaloryczne:
         </div>
-        <div>wiek: {{ age  }}</div>
-        <div>waga: {{ weight }}</div>
-        <div>wzrost: {{  height }}</div>
-        <div>plec: {{ sex  }} </div>
-        <div>aktywnosc w pracy: {{ workActivityLevel }}</div>
-        <div>aktywnosc w wolnym czasie: {{ freetimeActivityLevel }}</div>
-        <div>cel diety: {{ dietGoal }}</div>
-
         <div
             :style="{
                 alignItems: 'center',
@@ -114,9 +106,19 @@
                 fontSize: '32px',
             }"
         >
-        podstawowa przemiana materii: {{ caloricDemand }}
+        {{ caloricDemand }} kcal
         </div>
 
+        <!--
+            <div>
+            <error-box
+                :errors=this.errors
+                errorMessageVisible="errorMessageVisible"
+                >
+            </error-box>
+        </div>
+        -->
+        
         <div class>
             <div class="overlay" v-if="errorMessageVisible"></div>
             <div class="error-message-container" v-if="errorMessageVisible">
@@ -127,7 +129,6 @@
                 </div>
             </div>
         </div>
-        
     </div>
 </template>
 <script>
@@ -147,26 +148,108 @@ export default {
     
     methods: {
         calculate (){
-            //walidacja pól:
-            this.validateFields()
-            //obliczenie zapotrzebowania kalorycznego: 
-            if (!this.errors.age && !this.errors.sex && !this.errors.weight && !this.errors.height && !this.errors.workActivityLevel
-            && !this.errors.freetimeActivityLevel && !this.errors.dietGoal){
+            if (this.validateFields() === true){
+                this.calculateCaloricDemand()
+            }
+        },
+        calculateCaloricDemand(){
+            let basalMetabolicRate;
                 if (this.sex === "female"){
-                    this.caloricDemand = 655.1 + (9.563 * this.weight) + (1.85 * this.height) - (4.676 * this.age)
+                    basalMetabolicRate = 655.1 + (9.563 * this.weight) + (1.85 * this.height) - (4.676 * this.age)
                 } else if (this.sex === "male") {
-                    this.caloricDemand = 66.473 + (13.752 * this.weight) + (5.003 * this.height) - (6.775 * this.age) 
+                    basalMetabolicRate = 66.473 + (13.752 * this.weight) + (5.003 * this.height) - (6.775 * this.age) 
                 }
-            }            
-            //dodac obliczenie zapotrzebowania zalezne od aktywnosci
-            //calkowita przemiana materii = PPM * współczynnik aktywności fizycznej
-
+                let totalMetabolism = basalMetabolicRate * this.calculateActivityFactor()
+                console.log("poziom aktywnosci", this.calculateActivityFactor())
+                //zaleznosc od celu diety:
+                if (this.dietGoal === "deficit") {
+                    this.caloricDemand = Math.round(totalMetabolism - totalMetabolism * 0.15)
+                } else if (this.dietGoal === "surplus") {
+                    console.log("nadwyzke")
+                    this.caloricDemand = Math.round(totalMetabolism + totalMetabolism * 0.15)
+                } else if (this.dietGoal === "maintenance"){
+                    console.log("maintenance")
+                    this.caloricDemand = Math.round(totalMetabolism)
+                }
+                console.log("zapotrzebowanie kaloryczne: ", this.caloricDemand)
+        },
+        calculateActivityFactor(){
             //tablica dwuwymiarowa ze współczynnikami aktywnosci fizycznej
+            let activityFactor = [
+            [1.4, 1.5, 1.6, 1.7],
+            [1.5, 1.6, 1.7, 1.8],
+            [1.6, 1.7, 1.8, 1.9],
+            [1.7, 1.8, 1.9, 2.1],
+            [1.9, 2.0, 2.2, 2.3]
+            ];
 
+            let i = this.mapActivityLevel(this.freetimeActivityLevel)
+            let j = this.mapActivityLevel(this.workActivityLevel)
+            return activityFactor[i][j];
+        },
+        mapActivityLevel(activityLevel){
+            switch (activityLevel) {
+                case "sedentary":
+                    return 0;
+                case "lowActive":
+                    return 1;
+                case "active":
+                    return 2;
+                case "veryActive":
+                    return 3;
+                case "extremelyActive":
+                    return 4;
+            }
+        },
+        validateFields(){
+            let correct = true
+            if (this.sex == ""){
+                this.errors.sex = "płeć";
+                correct = false
+            } else {
+                this.errors.sex = "";
+            }
+            if (this.age == ""){
+                this.errors.age = "wiek";
+                correct = false
+            } else {
+                this.errors.age = "";
+            }
+            if (this.weight == ""){
+                this.errors.weight = "waga";
+                correct = false
+            } else {
+                this.errors.weight = "";
+            }
+            if (this.height == ""){
+                this.errors.height = "wzrost";
+                correct = false
+            } else {
+                this.errors.height = "";
+            }
+            if (this.workActivityLevel == ""){
+                this.errors.workActivityLevel = "poziom aktywności w pracy";
+                correct = false
+            } else {
+                this.errors.workActivityLevel = "";
+            }
+            if (this.freetimeActivityLevel == ""){
+                this.errors.freetimeActivityLevel = "poziom aktywności w wolnym czasie";
+                correct = false
+            } else {
+                this.errors.freetimeActivityLevel = "";
+            }
+            if (this.dietGoal == ""){
+                this.errors.dietGoal = "cel diety";
+                correct = false
+            } else {
+                this.errors.dietGoal = "";
+            }
 
-
-
-
+            if (Object.values(this.errors).some(err => err !== '')) {
+                    this.showErrorMessage();
+            }
+            return correct
         },
         updateAge (event){
            this.age = Number(event.target.value);
@@ -194,48 +277,6 @@ export default {
         },
         hideErrorMessage() {
             this.errorMessageVisible = false;
-        },
-        validateFields(){
-            if (this.sex == ""){
-                this.errors.sex = "płeć";
-            } else {
-                this.errors.sex = "";
-            }
-            if (this.age == ""){
-        
-                this.errors.age = "wiek";
-            } else {
-                this.errors.age = "";
-            }
-            if (this.weight == ""){
-                this.errors.weight = "waga";
-            } else {
-                this.errors.weight = "";
-            }
-            if (this.height == ""){
-                this.errors.height = "wzrost";
-            } else {
-                this.errors.height = "";
-            }
-            if (this.workActivityLevel == ""){
-                this.errors.workActivityLevel = "poziom aktywności w pracy";
-            } else {
-                this.errors.workActivityLevel = "";
-            }
-            if (this.freetimeActivityLevel == ""){
-                this.errors.freetimeActivityLevel = "poziom aktywności w wolnym czasie";
-            } else {
-                this.errors.freetimeActivityLevel = "";
-            }
-            if (this.dietGoal == ""){
-                this.errors.dietGoal = "cel diety";
-            } else {
-                this.errors.dietGoal = "";
-            }
-
-            if (Object.values(this.errors).some(err => err !== '')) {
-                    this.showErrorMessage();
-            }
         },
     },
     
