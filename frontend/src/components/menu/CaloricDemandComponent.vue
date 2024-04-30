@@ -172,6 +172,8 @@ export default {
                     this.caloricDemand = Math.round(totalMetabolism)
                 }
                 console.log("zapotrzebowanie kaloryczne: ", this.caloricDemand)
+                fetch('http://localhost:8080/calculator/caloricDemand', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({caloricDemand: this.caloricDemand})}) //GET bez method
+
         },
         calculateActivityFactor(){
             //tablica dwuwymiarowa ze współczynnikami aktywnosci fizycznej
