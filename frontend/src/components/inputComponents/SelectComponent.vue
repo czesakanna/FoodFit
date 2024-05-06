@@ -99,7 +99,7 @@ export default {
     height: auto;
     border-radius: 10px;
     color: #2f7d28;
-    font-weight: lighter;
+    font-weight: 350;
     max-width: 310px;
     overflow:hidden; 
     white-space:nowrap; 

@@ -15,7 +15,7 @@
     align-items: center; /* Wyśrodkowanie elementów w pionie */
     justify-content: center; /* Wyśrodkowanie elementów w poziomie */
     opacity: 0.85;
-} 
+}
 .app-name {
     align-self: flex-start; /* Align the app-name to the start (left) of the flex container */
     margin-bottom: 20px; /* Add some bottom margin for spacing */
@@ -37,6 +37,4 @@
 .message-text:hover {
     scale: 1.1; /*Po najechaniu tekst się powiększa */
     cursor: pointer; /*Po najechaniu pojawia się łapka zamiast klasycznego cursora */
-
 }
-

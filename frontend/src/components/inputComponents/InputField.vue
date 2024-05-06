@@ -14,16 +14,10 @@
 </template>
 
 <script setup>
-    import { defineProps} from "vue";
-    //jezeli zmienilibysmy nazwe z modelValue to przestanie działać
-    const props = defineProps([
-        "value",
-        "name",
-        "label",
-        "type",
-        "placeholder",
-    ]);
-    
+import { defineProps } from "vue";
+
+//jezeli zmienilibysmy nazwe z modelValue to przestanie działać
+const props = defineProps(["value", "name", "label", "type", "placeholder"]);
 </script>
 
 <style scoped>

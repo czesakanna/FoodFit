@@ -20,9 +20,9 @@
             <button-login name="Zaloguj"></button-login>
         </router-link>
         <p class="message-text">
-            <router-link to="/rejestracja">
-                Nie posiadasz jeszcze konta? Zarejestruj się!
-            </router-link>
+            <router-link to="/rejestracja"
+                >Nie posiadasz jeszcze konta? Zarejestruj się!</router-link
+            >
         </p>
         <p>Wartość pola nazwa użytkownika: {{ username }}</p>
     </div>
@@ -33,7 +33,6 @@ import InputField from "../inputComponents/InputField.vue";
 import SubmitButton from "../buttons/SubmitButton.vue";
 import AppNameText from "../textComponents/AppNameText.vue";
 import { ref } from "vue";
-
 export default {
     components: {
         "input-field": InputField,

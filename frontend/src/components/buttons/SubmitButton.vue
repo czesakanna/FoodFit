@@ -48,8 +48,6 @@ export default {
     background-color: #baccac;
     color: #2f7d28;
     font-weight: bold;
-    padding: 10px 20px;
-    transition: transform 0.3s;
 }
 
 .submit-btn:hover {
