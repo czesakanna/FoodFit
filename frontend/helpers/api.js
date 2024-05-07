@@ -3,7 +3,7 @@ export const fetchData = async (url, method = "GET", data = {}) => {
         const response = await fetch(url, {
             method: method,
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
+            body: method === "GET" ? undefined : JSON.stringify(data)
         });
 
         if (!response.ok) {
