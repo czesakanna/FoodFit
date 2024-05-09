@@ -14,7 +14,7 @@
             <menu-btn name="Postępy"></menu-btn>
             
             <router-link to="/">
-                <menu-btn name="Wyloguj"></menu-btn>
+                <menu-btn name="Wyloguj" @click="localStorage.clear()"></menu-btn>
             </router-link>
         </div>
     </div>

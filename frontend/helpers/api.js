@@ -20,9 +20,12 @@ export const fetchData = async (url, method = "GET", data = {}) => {
 
 export const checkAndUpdate = async (url, data = {}, userId) => {
     try {
+        console.log("hej z checkAndUpdate")
         // Check if entry exists for the user
         const response = await fetch(`${url}/`);
+        console.log(response)
         if (response.ok) {
+            console.log("response ok")
             const existingData = await response.json();
             const existingEntry = existingData.find(
                 (entry) => Number(entry.user_id) === Number(userId)
@@ -38,6 +41,7 @@ export const checkAndUpdate = async (url, data = {}, userId) => {
                 console.log("New entry added successfully");
             }
         } else {
+            console.log("catch")
             throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
     } catch (error) {

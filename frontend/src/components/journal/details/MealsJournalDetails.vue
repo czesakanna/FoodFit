@@ -8,7 +8,7 @@
             <template v-slot:activator="{ props }">
                 <div class="icon-wrapper">
                     <button
-                        @click="handleClick"
+                        @click="showModalToAddMeals(item.value)"
                         class="icon-button"
                     >
                         <svg-icon
@@ -18,12 +18,9 @@
                             color="grey"
                         ></svg-icon>
                     </button>
-                    <v-list-item
-                        v-bind="props"
-                        class="list-item"
-                    >
+                    <v-list-item v-bind="props" class="list-item">
                         <div class="text">
-                            <span>{{ item.name }}</span> 
+                            <span>{{ item.name }}</span>
                             <p>{{ data[item.value].calories }}kcl</p>
                         </div>
                     </v-list-item>
@@ -36,11 +33,50 @@
             ></v-list-item>
         </v-list-group>
     </v-list>
+    <reusable-modal :dialog="dialog">
+        <reusable-select
+            name="products"
+            label="produkty"
+            minWidth="180px"
+            :options="this.indgredientsOptions || []"
+            v-model="ingredientSelected"
+            @change="updateIndgredientsOptions"
+        ></reusable-select>
+        <input-field
+            name="weight"
+            label="waga(g)"
+            type="number"
+            v-model="weight"
+            @change="updateWeight"
+        ></input-field>
+        <submit-button
+            name="Dodaj"
+            @click="addIngredientToMealsList"
+        ></submit-button>
+        <v-list lines="one">
+            <p>Dodane produkty:</p>
+            <v-list-item
+                v-for="product in productList"
+                :key="`${product.name}/${product.calories}`"
+                :title="product.name"
+                :subtitle="`${product.calories}kcl, ${product.gram}g`"
+            ></v-list-item>
+        </v-list>
+    </reusable-modal>
 </template>
 
 <script>
-import SvgIcon from '@jamescoyle/vue-icon';
-import { mdiPlus } from '@mdi/js';
+import SvgIcon from "@jamescoyle/vue-icon";
+import ReusableModal from "../../modals/ReusableModal.vue";
+import InputField from "../../inputComponents/InputField.vue";
+import ReusableSelect from "../../inputComponents/ReusableSelect.vue";
+import SubmitButton from "../../buttons/SubmitButton.vue";
+
+import { getTodayDate } from "../../../../helpers/helpersFunctions";
+
+import { mdiPlus } from "@mdi/js";
+import { ref } from "vue";
+import { fetchData } from "../../../../helpers/api";
 
 export default {
     props: {
@@ -51,23 +87,75 @@ export default {
     },
     components: {
         SvgIcon,
+        "reusable-modal": ReusableModal,
+        "reusable-select": ReusableSelect,
+        "input-field": InputField,
+        "submit-button": SubmitButton,
     },
     data() {
         return {
             open: [
-                { value: 'breakfast', name: 'Śniadanie' },
-                { value: 'second_breakfast', name: 'II śniadanie' },
-                { value: 'dinner', name: 'Obiad' },
-                { value: 'dessert', name: 'Podwieczorek' },
-                { value: 'supper', name: 'Kolacja' },
+                { value: "breakfast", name: "Śniadanie" },
+                { value: "second_breakfast", name: "II śniadanie" },
+                { value: "dinner", name: "Obiad" },
+                { value: "dessert", name: "Podwieczorek" },
+                { value: "supper", name: "Kolacja" },
             ],
             path: mdiPlus,
+            dialog: false,
+            indgredientsOptions: [],
+            ingredientSelected: ref(""),
+            weight: ref(""),
+            mealType: "",
+            user: "",
+            productList: [],
         };
     },
     methods: {
-        handleClick() {
-            console.log('click');
+        showModalToAddMeals(meal) {
+            console.log("jestem");
+            this.mealType = meal;
+            this.dialog = true;
         },
+        updateIndgredientsOptions(event) {
+            const selectedValue = JSON.parse(event.target.value);
+            this.ingredientSelected = selectedValue;
+        },
+        updateWeight(event) {
+            const inputValue = event.target.value;
+            this.weight = inputValue;
+        },
+        addIngredientToMealsList() {
+            const calories =
+                (Number(this.weight) *
+                    Number(this.ingredientSelected.calories_on_hundred_gram)) /
+                100;
+            const meal = {
+                user: this.user,
+                name: this.ingredientSelected.label,
+                calories: calories,
+                gram: this.weight,
+                date: getTodayDate(),
+            };
+            console.log(meal, this.mealType);
+            this.productList.push(meal);
+        },
+    },
+    async mounted() {
+        try {
+            const userLogin = localStorage.getItem("login");
+            this.user = userLogin;
+            const response = await fetchData(
+                "http://localhost:3010/api/ingredients",
+                "GET",
+                {}
+            );
+            console.log(response);
+            this.indgredientsOptions = response;
+        } catch (error) {
+            console.error("Error fetching ingredients:", error);
+            // Handle error if needed
+        }
     },
 };
 </script>
@@ -94,23 +182,23 @@ export default {
 }
 
 .text {
-  display: flex; 
-  align-items: center; 
-  justify-content: space-between; 
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .text p {
-  margin-left: 8px; 
-  justify-self: flex-end; 
-  color: grey;
-  font-style: italic;
+    margin-left: 8px;
+    justify-self: flex-end;
+    color: grey;
+    font-style: italic;
 }
 
 .v-list-item {
     color: #2f7d28;
 }
 .v-list-item--variant-text .v-list-item__overlay {
-  color: grey;
+    color: grey;
 }
 
 .icon-button:hover {

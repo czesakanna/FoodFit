@@ -4,6 +4,7 @@ const User = require("../models/User");
 
 // POST /api/users dodawanie użytkownika do bazy - rejestracja
 router.post("/", async (req, res) => {
+    console.log("hej z endpointu")
     const newUser = new User(req.body);
     try {
         const user = await newUser.save();

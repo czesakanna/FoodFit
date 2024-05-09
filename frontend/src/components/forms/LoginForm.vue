@@ -55,6 +55,7 @@ export default {
             errors: {
                 login: "",
                 password: "",
+                loginOrPassword: "",
             },
         };
     },
@@ -84,12 +85,6 @@ export default {
             if (Object.values(this.errors).some((err) => err !== "")) {
                 this.showErrorMessage();
             }
-            //pobrac z bazdy uzytkownika o podanym loginie this.username:
-
-
-
-
-            
             return correct;
         },
         showErrorMessage() {
@@ -106,11 +101,59 @@ export default {
                 console.log('Walidacja nie powiodła się.');
             }
         },
+        /* Dominiki
+        async login() {
+            try {
+                const response = await fetchData(
+                    `http://localhost:3010/api/users?userName=${this.username}`
+                );
+                if (response) {
+                    const user = response;
+                    localStorage.setItem("login", user.userName);
+                    this.$router.push("/menu");
+                }
+            } catch (err) {
+                console.log(err);
+            }
+        },
+        */
+
+
+        /* wspolne
+        async login() {
+            try {
+                if (this.validate()) {
+                    const response = await fetchData(
+                        `http://localhost:3010/api/users?userName=${this.username}`
+                    );
+                    if (response) {
+                        const user = response;
+                        localStorage.setItem("login", user.userName);
+                        this.$router.push("/menu");
+                    }
+                }
+            } catch (err) {
+                console.log(err);
+            }
+        },
+        */
         async getUser(){
-            console.log("hej");
-            const response = await fetchData(`http://localhost:3010/api/users?userName=${this.username}`);
-            const user = response;
-            console.log('Zalogowany użytkownik:', user);
+            console.log("hej z getUser");
+            //pobrac z bazy uzytkownika o podanym loginie this.username:
+            try {
+                console.log("hej z try");
+                const response = await fetchData(`http://localhost:3010/api/users?userName=${this.username}`);
+                const user = response;
+                console.log('Zalogowany użytkownik:', user);
+            }
+            catch (error) {
+                console.log("hej z catcha") //TODO: obsłużyć error w api.js
+                console.log('Użytkownik o podanej nazwie nie został znaleziony.');
+                // Dalsza logika w przypadku, gdy użytkownik nie został znaleziony
+                this.errors.loginOrPassword = "login lub hasło"
+                this.showErrorMessage(); //wyswietl bład gdy login lub hasło beda złe 
+            }
+            
         },
     }
 }
