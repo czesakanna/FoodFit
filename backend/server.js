@@ -11,6 +11,7 @@ const mealsRoutes = require("./routes/mealsRoutes"); // Adjust the path as neede
 const calculatorRoutes = require("./routes/calculatorRoutes");
 const userRoutes = require("./routes/userRoutes");
 const ingredientsRoutes = require("./routes/ingredientRoutes");
+const activitiesRoutes = require("./routes/activitiesRoutes");
 
 // Middleware
 app.use(cors());
@@ -21,6 +22,7 @@ app.use("/api/meals", mealsRoutes);
 app.use("/api/calculator", calculatorRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/ingredients", ingredientsRoutes);
+app.use("/api/activities", activitiesRoutes);
 
 // Database connection
 const CONNECTION_STRING =

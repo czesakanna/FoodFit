@@ -1,6 +1,7 @@
 <template>
     <div class="modal-overlay" v-if="dialog" @click="closeModal"></div>
     <div class="modal-container" v-if="dialog">
+        <p class="modal-close-button" @click="closeModal">×</p>
         <div class="modal-content">
             <slot></slot>
         </div>
@@ -11,12 +12,8 @@
 export default {
     props: {
         dialog: Boolean,
-    },
-    methods: {
-        closeModal() {
-            this.$emit("update:dialog", false);
-        },
-    },
+        closeModal: Function,
+    }
 };
 </script>
 
@@ -41,5 +38,13 @@ export default {
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
+}
+.modal-close-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    margin-right: 20px;
 }
 </style>

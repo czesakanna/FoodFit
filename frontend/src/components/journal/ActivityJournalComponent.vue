@@ -20,17 +20,9 @@
                 :key="index"
                 :value="index"
             >
-                <div class="training-box">
-                    <button
-                        @click="addTraining"
-                        class="add-btn"
-                    >
-                        Dodaj trening
-                     
-                    </button>
-                </div>
+      
                 <activity-journal-details
-                    :data="data"
+                    :data="data"                  
                 ></activity-journal-details>
             </v-window-item>
         </v-window>
@@ -58,6 +50,7 @@ export default {
                 swimming: { name: 'pływanie', calories: 240 },
             },
             path: mdiPlus,
+            
         };
     },
     methods: {
@@ -65,9 +58,6 @@ export default {
             this.tab = index;
             this.selectedDay = index;
         },
-        addTraining(){
-            console.log('add training')
-        }
     },
     mounted() {
         this.selectedDay = this.currentDay; // Przy kadym ładowaniu komponentu selectedDay z automatu jest dniem biezacym
@@ -89,25 +79,6 @@ export default {
 }
 
 .v-tab.v-tab.v-btn.active {
-    text-decoration: none !important;
-    background-color: rgba(47, 125, 40, 0.5);
-    color: white !important;
-}
-
-.training-box {
-    margin-top: 2rem;
-    display: flex;
-    align-items: left;
-    justify-content: space-around;
-}
-.add-btn{
-    border: 1px solid #2f7d28;;
-    padding: 0.5rem;
-    border-radius: 30px;
-    background-color: transparent;
-    cursor: pointer;
-}
-.add-btn:hover{
     text-decoration: none !important;
     background-color: rgba(47, 125, 40, 0.5);
     color: white !important;
