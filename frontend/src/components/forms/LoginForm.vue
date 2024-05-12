@@ -9,27 +9,32 @@
             name="username"
             label="Nazwa użytkownika"
             v-model="username"
+            @input="clearError('username')"
             @change="updateUsername"
+            :error="errorsMessages.username"
         ></input-field>
         <input-field
             name="password"
             label="Hasło"
             type="password"
+            @input="clearError('password')"
             @change="updatePassword"
+            :error="errorsMessages.password"
         ></input-field>
-            <button-login name="Zaloguj" @click="login"></button-login>
+        <button-login name="Zaloguj" @click="login"></button-login>
 
         <p class="message-text">
             <router-link to="/rejestracja"
-                >Nie posiadasz jeszcze konta? Zarejestruj się!</router-link>
+                >Nie posiadasz jeszcze konta? Zarejestruj się!</router-link
+            >
         </p>
-        <p>Wartość pola nazwa użytkownika: {{ username }}</p>
-        <p>Wartość pola haslo: {{ password }}</p>
-        <error-modal
-            :errorMessageVisible="errorMessageVisible"
-            :hideErrorMessage="hideErrorMessage"
-            :errors="errors"
-        ></error-modal>
+    </div>
+    <div v-if="alertProps.show">
+        <reusable-alert
+            :color="alertProps.color"
+            :text="alertProps.text"
+            :title="alertProps.title"
+        ></reusable-alert>
     </div>
 </template>
 
@@ -38,30 +43,41 @@ import InputField from "../inputComponents/InputField.vue";
 import SubmitButton from "../buttons/SubmitButton.vue";
 import AppNameText from "../textComponents/AppNameText.vue";
 import ErrorModal from "../modals/ErrorModal.vue";
-import { fetchData } from "../../../helpers/api";
+import ReusableAlert from "../modals/ReusableAlert.vue";
+import { checkAndLogin } from "../../../helpers/api";
 import { ref } from "vue";
+
 export default {
     components: {
         "input-field": InputField,
         "button-login": SubmitButton,
         "app-name": AppNameText,
-        "error-modal": ErrorModal
+        "error-modal": ErrorModal,
+        "reusable-alert": ReusableAlert,
     },
     data() {
         return {
             username: ref(""),
             password: ref(""),
-            errorMessageVisible: false,
-            errors: {
-                login: "",
+            errorsMessages: {
+                username: "",
                 password: "",
-                loginOrPassword: "",
+            },
+            alertProps: {
+                show: false,
+                color: "",
+                text: "",
+                title: "",
             },
         };
     },
     methods: {
-        //tu musi być update tego pola, które definiuje w komponencie
-        // to pole jest tutaj bo tu chcemy miec dane ktore wyslemy do zapisu
+        updatePropsValue(value) {
+            this.alertProps = value;
+        },
+        updateErrorMessage(message) {
+            this.errorMessage = message;
+        },
         updateUsername(event) {
             this.username = event.target.value;
         },
@@ -71,92 +87,53 @@ export default {
         validate() {
             let correct = true;
             if (this.username == "") {
-                this.errors.username = "login";
+                this.errorsMessages.username =
+                    "Pole nie może być puste. Uzupełnij je.";
                 correct = false;
-            } else {
-                this.errors.username = "";
             }
             if (this.password == "") {
-                this.errors.password = "hasło";
+                this.errorsMessages.password =
+                    "Pole nie może być puste. Uzupełnij je.";
                 correct = false;
-            } else {
-                this.errors.password = "";
             }
-            if (Object.values(this.errors).some((err) => err !== "")) {
-                this.showErrorMessage();
-            }
+
             return correct;
         },
-        showErrorMessage() {
-            this.errorMessageVisible = true;
+        navigateToMenu() {
+            this.$router.push("/menu"); // Nawigacja do menu
         },
-        hideErrorMessage() {
-            this.errorMessageVisible = false;
-        },
-        login() {
-            if(this.validate()){
-                this.getUser()
-                this.$router.push('/menu')
-            } else {
-                console.log('Walidacja nie powiodła się.');
-            }
-        },
-        /* Dominiki
-        async login() {
-            try {
-                const response = await fetchData(
-                    `http://localhost:3010/api/users?userName=${this.username}`
-                );
-                if (response) {
-                    const user = response;
-                    localStorage.setItem("login", user.userName);
-                    this.$router.push("/menu");
-                }
-            } catch (err) {
-                console.log(err);
-            }
-        },
-        */
-
-
-        /* wspolne
         async login() {
             try {
                 if (this.validate()) {
-                    const response = await fetchData(
-                        `http://localhost:3010/api/users?userName=${this.username}`
+                    await checkAndLogin(
+                        `http://localhost:3010/api/users?userName=${this.username}`,
+                        {},
+                        this.username,
+                        this.password,
+                        this.updatePropsValue,
+                        this.navigateToMenu
                     );
-                    if (response) {
-                        const user = response;
-                        localStorage.setItem("login", user.userName);
-                        this.$router.push("/menu");
-                    }
                 }
             } catch (err) {
                 console.log(err);
+            } finally {
+                setTimeout(() => {
+                    this.alertProps = {
+                        show: false,
+                        color: "",
+                        icon: "",
+                        text: "",
+                        title: "",
+                    };
+                }, 3000);
             }
         },
-        */
-        async getUser(){
-            console.log("hej z getUser");
-            //pobrac z bazy uzytkownika o podanym loginie this.username:
-            try {
-                console.log("hej z try");
-                const response = await fetchData(`http://localhost:3010/api/users?userName=${this.username}`);
-                const user = response;
-                console.log('Zalogowany użytkownik:', user);
-            }
-            catch (error) {
-                console.log("hej z catcha") //TODO: obsłużyć error w api.js
-                console.log('Użytkownik o podanej nazwie nie został znaleziony.');
-                // Dalsza logika w przypadku, gdy użytkownik nie został znaleziony
-                this.errors.loginOrPassword = "login lub hasło"
-                this.showErrorMessage(); //wyswietl bład gdy login lub hasło beda złe 
-            }
-            
+        clearError(fieldName) {
+            // Zerowanie komunikatu błędu dla danego pola po wpisaniu wartości
+            this.errorsMessages[fieldName] = "";
         },
-    }
-}
+    },
+};
 </script>
 
 <style>

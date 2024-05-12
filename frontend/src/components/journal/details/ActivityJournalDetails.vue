@@ -7,32 +7,13 @@
             Dodaj trening
         </button>
     </div>
-    <v-list>
-        <v-list-group
-            v-for="(item, index) in open"
-            :key="index"
-            :value="item.value"
-        >
-            <template v-slot:activator="{ props }">
-                <div>            
-                    <v-list-item
-                        v-bind="props"
-                        class="list-item"
-                    >
-                        <div class="text">
-                            <span>{{ item.name }}</span>
-                            <p>{{ data[item.value].calories }}kcl</p>
-                        </div>
-                    </v-list-item>
-                </div>
-            </template>
-            <v-list-item
-                :key="item.value"
-                :title="data[item.value].name"
-                :value="data[item.value].name"
-            ></v-list-item>
-        </v-list-group>
-    </v-list>
+
+<v-list 
+v-for="(activity, index) in selectedActivities"       
+>
+<selected-activity :selectedActivity="activity" :removeActivity="removeActivity" />
+</v-list>
+
     <reusable-modal 
         :dialog = "dialog" 
         :closeModal = "closeModal">
@@ -53,9 +34,9 @@
         ></input-field>
         <submit-button
             name="Dodaj"
-            @click="addActivity"
+            @click="addActivity(this.duration, this.activitySelected.calories_on_hour, this.activitySelected.name)"
         ></submit-button>
-        <v-list lines="one">
+        <!-- <v-list lines="one">
             <p>Dodane aktywności:</p>
             <v-list-item
                 v-for="activity in activityList"
@@ -63,7 +44,7 @@
                 :title="activity.name"
                 :subtitle="`${activity.calories}kcal, ${activity.duration}min`"
             ></v-list-item>
-        </v-list>
+        </v-list> -->
     </reusable-modal>
 </template>
 
@@ -74,6 +55,7 @@ import ReusableModal from "../../modals/ReusableModal.vue";
 import ReusableSelect from "../../inputComponents/ReusableSelect.vue";
 import InputField from "../../inputComponents/InputField.vue";
 import SubmitButton from "../../buttons/SubmitButton.vue";
+import SelectedActivity from "./SelectedActivityComponent.vue"
 import { ref } from 'vue';
 import { fetchData } from "../../../../helpers/api";
 
@@ -82,9 +64,17 @@ import { getTodayDate } from "../../../../helpers/helpersFunctions";
 
 export default {
     props: {
-        data: {
-            type: Object,
+        selectedActivities: {
+            type: Array,
             required: true,
+        },
+        addActivity: {
+            type:Function,
+            required:true,
+        },
+        removeActivity:{
+            type:Function,
+            required:true,
         }
     },
     components: {
@@ -93,27 +83,25 @@ export default {
         "reusable-select": ReusableSelect,
         "input-field" : InputField,
         "submit-button": SubmitButton,
+        "selected-activity": SelectedActivity
     },
     data() {
         return {
-            open: [
-                { value: 'running', name: 'bieganie' },
-                { value: 'swimming', name: 'pływanie' },
-               
-            ],
             path: mdiPlus,
             dialog: false,
             activitiesOptions: [],
             activitySelected: ref(""),
             duration: ref(""),
-            activityList: []
+
         };
     },
     methods: {
         handleClick() {
+       
             console.log('click');
         },
         addTraining(){
+
             console.log('add training')
             this.dialog = true;
         },
@@ -129,21 +117,7 @@ export default {
             this.duration = inputValue;
             console.log("czas trwania: ", this.duration)
         },
-        addActivity() {
-            const calories =
-                (Number(this.duration) * Number(this.activitySelected.calories_on_hour)) / 60;
-                console.log("z liczenia", Number(this.duration))
-                console.log("kalorie na 60 min",Number(this.activitySelected.calories_on_hour))
-            const activity = {
-                user: this.user,
-                name: this.activitySelected.name,
-                calories: calories,
-                duration: this.duration,
-                date: getTodayDate(),
-            };
-            console.log('activity',activity);
-            this.activityList.push(activity);
-        },
+
     },
     async mounted() {
         try {

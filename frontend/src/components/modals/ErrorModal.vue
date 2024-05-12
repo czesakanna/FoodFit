@@ -1,13 +1,23 @@
 <template>
     <div class="overlay" v-if="errorMessageVisible"></div>
     <div class="error-message-container" v-if="errorMessageVisible">
-        <div>
-            <p class="error-close-button" @click="hideErrorMessage">×</p>
+        <button
+            @click="hideErrorMessage"
+            class="icon-button error-close-button"
+        >
+            <svg-icon
+                type="mdi"
+                :path="path"
+                class="icon"
+                color="grey"
+            ></svg-icon>
+        </button>
+        <div class="err-message">
             <p
                 v-if="Object.values(errors).some((err) => err !== '')"
                 class="error-message-heading"
             >
-                Uzupełnij brakujące informacje:
+                {{ message }}
             </p>
             <p class="error-message" v-for="error in errors" :key="error">
                 {{ error }}
@@ -17,11 +27,23 @@
 </template>
 
 <script>
+import SvgIcon from "@jamescoyle/vue-icon";
+import { mdiClose } from "@mdi/js";
+
 export default {
+    data() {
+        return {
+            path: mdiClose,
+        };
+    },
     props: {
         errorMessageVisible: Boolean,
         hideErrorMessage: Function,
         errors: Object,
+        message: String,
+    },
+    components: {
+        SvgIcon,
     },
 };
 </script>
@@ -55,14 +77,28 @@ export default {
     right: 5px;
     cursor: pointer;
     font-size: 1.2rem;
-    margin-right: 20px;
 }
 .error-message-heading {
     font-weight: 500;
     margin-left: 20px;
 }
+.error-close-button {
+    position: absolute;
+    top: 5px;
+    right: 5px; /* Zmiana right na 5px */
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+.err-message {
+    margin-top: 30px;
+}
+
 .error-message {
     margin-left: 30px;
     font-weight: 300;
+}
+.icon-button:hover {
+    scale: 1.1;
+    cursor: pointer;
 }
 </style>
