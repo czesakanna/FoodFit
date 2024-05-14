@@ -83,8 +83,8 @@ router.delete("/", async (req, res) => {
     
         
         await user.save();
-
-        res.status(204);
+            
+            res.json({});
     } catch (error) {
         console.error("Error post activities:", error);
         res.status(500).json({

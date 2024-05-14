@@ -101,7 +101,7 @@ export const checkAndLogin = async (
             const existingData = await response.json();
             const existingEntry = existingData.find(
                 (entry) =>
-                entry.userName.toLowerCase() === userLogin.toLowerCase() &&
+                entry.userName === userLogin &&
                 entry.password === userPassword
             );
             if (existingEntry) {
