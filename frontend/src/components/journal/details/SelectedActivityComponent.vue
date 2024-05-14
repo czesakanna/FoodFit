@@ -1,30 +1,47 @@
 <template>
-    <v-list-item >
+    <v-list-item>
         <div class="item-wrapper">
             <div class="text">
                 <span>{{ selectedActivity.name }}</span>
-                 <p>{{selectedActivity.calories}}kcl</p>
+                <p>{{ selectedActivity.calories }}kcl</p>
+            </div>
+            <button
+                class="remove-button"
+                @click="removeActivity(selectedActivity._id)"
+            >
+                <svg-icon
+                    type="mdi"
+                    :path="pathToRemove"
+                    class="icon"
+                    color="red"
+                ></svg-icon>
+            </button>
         </div>
-        <button class="remove-button" @click="removeActivity(selectedActivity._id)">
-            X
-        </button>
-        </div>
-
     </v-list-item>
-  
 </template>
 
 <script>
+import SvgIcon from '@jamescoyle/vue-icon';
+import { mdiClose } from '@mdi/js';
+
 export default {
+    components: {
+        SvgIcon,
+    },
+    data() {
+        return {
+            pathToRemove: mdiClose,
+        };
+    },
     props: {
         selectedActivity: {
             type: Object,
             required: true,
         },
-        removeActivity:{
-            type:Function
-        }
-    }
+        removeActivity: {
+            type: Function,
+        },
+    },
 };
 </script>
 
@@ -43,15 +60,14 @@ export default {
 
 .v-list-item {
     color: #2f7d28;
-
-  
 }
 .item-wrapper {
     display: flex;
     justify-content: space-between;
 }
-.remove-button{
-    color:red;
-}
 
+.remove-button:hover {
+    scale: 1.1;
+    cursor: pointer;
+}
 </style>

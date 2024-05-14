@@ -1,4 +1,6 @@
+
 const express = require("express");
+const { ConnectionStates } = require("mongoose");
 const router = express.Router();
 const User = require("../models/User");
 
@@ -14,32 +16,6 @@ router.post("/", async (req, res) => {
     }
 });
 
-// GET /api/users pobieranie uzytkownika z bazy - logowanie
-// router.get("/", async (req, res) => {
-//     const { userName } = req.query; //w body musi byc i login i haslo, zmienic
-//     console.log("server userName", userName);
-//     try {
-//         const user = await User.findOne({ userName });
-
-//         // Jeśli użytkownik o podanym loginie nie istnieje error
-//         if (!user) {
-//             return res
-//                 .status(404)
-//                 .json({
-//                     message:
-//                         "Użytkownik o podanym loginie nie został znaleziony.",
-//                 });
-//         }
-//         // Jeśli użytkownik został znaleziony, zwróć go w odpowiedzi haslo id itd.
-//         res.status(200).json(user); //na froncie sprawdzic czy haslo tego usera jest rowne haslowi podanemu
-//     } catch (error) {
-//         // Jeśli wystąpił błąd podczas wyszukiwania użytkownika, zwróć błąd serwera
-//         res.status(500).json({ message: error.message });
-//     }
-// });
-
-//GET
-// GET /api/products
 router.get("/", async (req, res) => {
     try {
         const users = await User.find();
@@ -51,5 +27,39 @@ router.get("/", async (req, res) => {
         });
     }
 });
+router.get('/:userName/caloricDemand',async (req,res)=>{
+    const userName = req.params.userName;
+
+    try {
+        const user = await User.findOne({userName});
+
+        if(!user){
+            return res.status(404).json({error: "user not found"})
+        }
+
+       return res.json({caloricDemand:user.caloricDemand})
+    }catch(err){
+        res.status(500);
+    }
+})
+router.patch('/:userName',async (req,res)=>{
+    const userName = req.params.userName;
+    const {caloricDemand} = req.body;
+
+    try{
+       const updatedUser = await User.findOneAndUpdate({userName},{caloricDemand},{new: true})
+
+       if(!updatedUser){
+        return res.status(404).json({error:"User not found"})
+       }
+
+       return res.status(200).json(updatedUser)
+
+    }catch(err){
+
+        res.status(505).json({error:"Server error"})
+    }
+
+})
 
 module.exports = router;

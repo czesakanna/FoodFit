@@ -1,3 +1,4 @@
+
 <template>
     <v-list>
         <v-list-group
@@ -21,21 +22,45 @@
                     <v-list-item v-bind="props" class="list-item">
                         <div class="text">
                             <span>{{ item.name }}</span>
-                            <p>{{ data[item.value].calories }}kcl</p>
+                            <p>
+                                {{
+                                    data[item.value].calories
+                                        ? data[item.value].calories
+                                        : 0
+                                }}
+                                kcl
+                            </p>
                         </div>
                     </v-list-item>
                 </div>
             </template>
-            <v-list-item
-                :key="item.value"
-                :title="data[item.value].name"
-                :value="data[item.value].name"
-            ></v-list-item>
+            <v-list lines="one">
+                <div
+                    class="item-wrapper"
+                    v-for="item in data[item.value].data"
+                    :key="item._id"
+                >
+                    <div class="meal-text">
+                        <span :style="{ color: '#2f7d28' }">{{
+                            item.name
+                        }}</span>
+                        <span :style="{ color: 'gray' }"
+                            >{{ item.calories }} kcl, {{ item.gram }} g</span
+                        >
+                    </div>
+                    <button class="icon-button" @click="removeMeal(item._id)">
+                        <svg-icon
+                            type="mdi"
+                            :path="pathToRemove"
+                            class="icon"
+                            color="red"
+                        ></svg-icon>
+                    </button>
+                </div>
+            </v-list>
         </v-list-group>
     </v-list>
-    <reusable-modal 
-        :dialog="dialog" 
-        :closeModal="closeModal">
+    <reusable-modal :dialog="dialog" :closeModal="closeModal">
         <reusable-select
             name="products"
             label="produkty"
@@ -51,19 +76,12 @@
             v-model="weight"
             @change="updateWeight"
         ></input-field>
-        <submit-button
-            name="Dodaj"
-            @click="addIngredientToMealsList"
-        ></submit-button>
-        <v-list lines="one">
-            <p>Dodane produkty:</p>
-            <v-list-item
-                v-for="product in productList"
-                :key="`${product.name}/${product.calories}`"
-                :title="product.name"
-                :subtitle="`${product.calories}kcal, ${product.gram}g`"
-            ></v-list-item>
-        </v-list>
+        <div :style="{ textAlign: 'center' }">
+            <submit-button
+                name="Dodaj"
+                @click="addIngredientToMealsList"
+            ></submit-button>
+        </div>
     </reusable-modal>
 </template>
 
@@ -74,9 +92,7 @@ import InputField from "../../inputComponents/InputField.vue";
 import ReusableSelect from "../../inputComponents/ReusableSelect.vue";
 import SubmitButton from "../../buttons/SubmitButton.vue";
 
-import { getTodayDate } from "../../../../helpers/helpersFunctions";
-
-import { mdiPlus } from "@mdi/js";
+import { mdiPlus, mdiClose } from "@mdi/js";
 import { ref } from "vue";
 import { fetchData } from "../../../../helpers/api";
 
@@ -84,6 +100,10 @@ export default {
     props: {
         data: {
             type: Object,
+            required: true,
+        },
+        selectedDate: {
+            type: String,
             required: true,
         },
     },
@@ -104,6 +124,7 @@ export default {
                 { value: "supper", name: "Kolacja" },
             ],
             path: mdiPlus,
+            pathToRemove: mdiClose,
             dialog: false,
             indgredientsOptions: [],
             ingredientSelected: ref(""),
@@ -126,24 +147,69 @@ export default {
             const inputValue = event.target.value;
             this.weight = inputValue;
         },
-        addIngredientToMealsList() {
-            const calories =
-                (Number(this.weight) *
-                    Number(this.ingredientSelected.calories_on_hundred_gram)) /
-                100;
-            const meal = {
-                user: this.user,
-                name: this.ingredientSelected.label,
-                calories: calories,
-                gram: this.weight,
-                date: getTodayDate(),
-            };
-            console.log(meal, this.mealType);
-            this.productList.push(meal);
+        async addIngredientToMealsList() {
+            try {
+                const calories =
+                    Math.round((Number(this.weight) *
+                        Number(
+                            this.ingredientSelected.calories_on_hundred_gram
+                        )) /
+                    100);
+                const date = this.selectedDate;
+
+                const mealToPost = {
+                    userName: this.user,
+                    name: this.ingredientSelected.label,
+                    calories: calories,
+                    gram: Number(this.weight),
+                    date: date,
+                    type: this.mealType,
+                };
+
+                const response = await fetchData(
+                    "http://localhost:3010/api/user-meals",
+                    "POST",
+                    mealToPost
+                );
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const responseData = await response.json();
+
+                this.productList.push(responseData);
+            } catch (err) {
+                console.error("Error adding ingredient to meals list:", err);
+            } finally {
+                this.dialog = false;
+                this.$emit("ingredient-added");
+            }
         },
-        closeModal () {
+        async removeMeal(id) {
+            try {
+                const response = await fetchData(
+                    "http://localhost:3010/api/user-meals",
+                    "DELETE",
+                    {
+                        userName: this.user,
+                        mealId: id,
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+            } catch (error) {
+                console.error("Error removing meal:", error);
+                // Obsługa błędu, np. wyświetlenie komunikatu użytkownikowi
+            } finally {
+                this.$emit("ingredient-added");
+            }
+        },
+
+        closeModal() {
             this.dialog = false;
-        }
+        },
     },
     async mounted() {
         try {
@@ -154,7 +220,6 @@ export default {
                 "GET",
                 {}
             );
-            console.log(response);
             this.indgredientsOptions = response;
         } catch (error) {
             console.error("Error fetching ingredients:", error);
@@ -208,5 +273,16 @@ export default {
 .icon-button:hover {
     scale: 1.1;
     cursor: pointer;
+}
+.item-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+}
+
+.meal-text {
+    display: flex;
+    flex-direction: column;
 }
 </style>

@@ -1,60 +1,223 @@
 <template>
   <div :style="{ marginTop: '1rem' }">
-    <v-tabs v-model="tab" hide-slider>
-      <v-tab
-        v-for="(day, index) in days"
-        :key="index"
-        :value="index"
-        :class="{ active: index === selectedDay }"
-        @click="changeDay(index)"
+      <date-navigation :currentWeekRange="currentWeekRange" :previousWeek="previousWeek" :nextWeek="nextWeek" >
+
+      </date-navigation>
+      <v-tooltip
+          v-for="(day, index) in daysListWithDate"
+          :key="index"
+          :text="day.dateToDisplay"
+          location="top"
+          :styles="{ top: '5px' }"
       >
-        {{ day }}
-      </v-tab>
-    </v-tabs>
-    <v-window v-model="tab">
-      <v-window-item
-        v-for="(day, index) in days"
-        :key="index"
-        :value="index"
-      >
-        <!-- Przekazujemy dane zgodnie z aktywnym dniem -->
-        <meals-journal-details :data="data"></meals-journal-details>
-      </v-window-item>
-    </v-window>
+          <template v-slot:activator="{ props }">
+              <v-tab
+                  v-bind="props"
+                  @click="setSelectedDate(day.date, index)"
+                  :class="{ active: index === tab }"
+              >
+                  {{ day.day }}
+              </v-tab>
+          </template>
+      </v-tooltip>
+      <v-window v-model="tab">
+          <v-window-item
+              v-for="(day, index) in daysListWithDate"
+              :key="index"
+              :value="index"
+          >
+              <!-- Przekazujemy dane zgodnie z aktywnym dniem -->
+              <meals-journal-details
+                  :data="data"
+                  :selectedDate="selectedDate"
+                  @ingredient-added="fetchData"
+              ></meals-journal-details>
+          </v-window-item>
+      </v-window>
+      <div class="totalCalories">
+        <div class="totalCaloriesValue">{{ this.totalCalories}} /  {{ this.caloricDemand }} kcal  <div class="additional_calories">{{this.useUserActivitiesStore.caloriesBurned[this.selectedDay] ?  ` ( +${this.useUserActivitiesStore.caloriesBurned[this.selectedDay]} kcal )`: ''   }}</div> </div>
+      </div>
   </div>
 </template>
 
 <script>
+import { startOfWeek, endOfWeek, format, addDays } from "date-fns";
+import { fetchData } from '../../../helpers/api.js';
 import MealsJournalDetails from './details/MealsJournalDetails.vue';
+import DateNavigation from "./details/DateNavigation.vue"
+import { ref, inject } from "vue";
 
 export default {
   components: {
-    'meals-journal-details': MealsJournalDetails,
+      'meals-journal-details': MealsJournalDetails,
+      "date-navigation": DateNavigation
   },
+  setup() {
+   const useUserActivitiesStore = inject('userActivitiesStore'); //pobranie kontekstu 
+   useUserActivitiesStore.fetchActivites(); // uycie funkcji z kontekstu
+   return { useUserActivitiesStore };
+ },
   data() {
-    return {
-      days: ['Pon', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd'],
-      currentDay: new Date().getDay() === 0 ? 6 : new Date().getDay() - 1,
-      selectedDay: null,
-      tab: new Date().getDay() === 0 ? 6 : new Date().getDay() - 1,
-      data: {
-        breakfast: {name: "sniad", calories: 120},
-        second_breakfast: {name: "sec", calories: 240},
-        dinner: {name: "obiad", calories: 350},
-        dessert: {name: "deser", calories: 110},
-        supper: {name: "kolacja", calories: 200}
-      },
-    };
+      return {
+          daysListWithDate: [],
+          currentDay: new Date().getDay() === 0 ? 6 : new Date().getDay() - 1,
+          selectedDay: new Date(),
+          selectedDate: null,
+          currentDate: new Date(),
+          currentWeekRange: { weekStart: null, weekEnd: null },
+          tab: new Date().getDay() === 0 ? 6 : new Date().getDay() - 1,
+          data: {
+              breakfast: { name: 'sniad', calories: null, data: [] },
+              second_breakfast: { name: 'sec', calories: null, data: [] },
+              dinner: { name: 'obiad', calories: null, data: [] },
+              dessert: { name: 'deser', calories: null, data: [] },
+              supper: { name: 'kolacja', calories: null, data: [] },
+          },
+          totalCalories:ref(0),
+          caloricDemand:ref(0),
+          userName: localStorage.getItem('login'),
+      };
   },
   methods: {
-    changeDay(index) {
-      this.tab = index;
-      this.selectedDay = index;
-    },
-  
+      changeDay(index) {
+          try {
+              this.tab = index;
+              this.selectedDay = index;
+              this.updateSelectedDate();
+              this.fetchData();
+          } catch (err) {
+              console.log(err);
+          }
+      },
+      previousWeek() {
+          const date = new Date(this.selectedDay);
+
+          date.setDate(date.getDate() - 7);
+          this.selectedDay = format(new Date(date), "yyyy-MM-dd");
+          this.generateDaysList();
+          this.generateWeekRange();
+          this.fetchData();
+      },
+      nextWeek() {
+        console.log("NEXT WEEK");
+          const date = new Date(this.selectedDay);
+
+          date.setDate(date.getDate() + 7);
+          this.selectedDay = format(new Date(date), "yyyy-MM-dd");
+          this.generateDaysList();
+          this.generateWeekRange();
+          this.fetchData();
+      },
+      updateSelectedDate() {
+          const today = new Date();
+          const currentDay = today.getDay() === 0 ? 6 : today.getDay() - 1;
+          const diff = this.selectedDay - currentDay;
+          const newDate = new Date(today);
+          newDate.setDate(today.getDate() + diff);
+          this.selectedDate = newDate.toISOString().split('T')[0]; // Ustawienie selectedDate
+          this.fetchData(); // Fetch danych przy każdej zmianie daty
+      },
+      generateDaysList() {
+          const days = ['Pon', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd'];
+          const startDate = new Date(this.selectedDay);
+          const currentWeekStart = startOfWeek(startDate, {
+              weekStartsOn: 1,
+          });
+          const currentWeekEnd = endOfWeek(startDate);
+
+          this.daysListWithDate = [];
+          for (let i = 0; i < 7; i++) {
+              const day = addDays(currentWeekStart, i);
+              const formattedDay = format(day, 'yyyy-MM-dd');
+              this.daysListWithDate.push({
+                  day: days[i],
+                  date: formattedDay,
+                  dateToDisplay: format(day, 'dd-MM'),
+              });
+          }
+      },
+      generateWeekRange() {
+          const startDate = new Date(this.selectedDay);
+          const currentWeekStart = startOfWeek(startDate, {
+              weekStartsOn: 1,
+          });
+          const currentWeekEnd = endOfWeek(startDate, { weekStartsOn: 1 });
+          this.currentWeekRange = {
+              weekStart: format(currentWeekStart, 'yyyy-MM-dd'),
+              weekEnd: format(currentWeekEnd, 'yyyy-MM-dd'),
+          };
+      },
+      setSelectedDate(date, index) {
+          this.tab = index;
+          this.selectedDay = format(new Date(date), 'yyyy-MM-dd');
+          this.selectedDate = this.selectedDay;
+          this.fetchData();
+      },
+      async fetchCaloricDemand(){
+        console.log("fetchCaloricDemand")
+        try {
+          const {caloricDemand} = await fetchData(`http://localhost:3010/api/users/${this.userName}/caloricDemand`);
+
+          this.caloricDemand = caloricDemand;
+        }catch(err){
+          console.error(err)
+        }
+      },
+      async fetchData() {
+          try {
+            console.log('fetchData');
+              const formattedDate = this.selectedDate;
+              const response = await fetchData(
+                  `http://localhost:3010/api/user-meals?userName=${this.userName}&date=${formattedDate}`
+              );
+
+              console.log('response', response);
+
+              const filterData = response.meals;
+              if (filterData) {
+                  const mealTypes = [
+                      'breakfast',
+                      'second_breakfast',
+                      'dinner',
+                      'dessert',
+                      'supper',
+                  ];
+                  this.totalCalories = 0;
+
+                  mealTypes.forEach((type) => {
+                      const mealsOfType = filterData.filter(
+                          (item) => item.type === type
+                      );
+                      const totalCalories = mealsOfType.reduce(
+                          (total, item) => total + item.calories,
+                          0
+                      );
+
+                      this.data[type].data = mealsOfType;
+                      this.data[type].calories = totalCalories
+                      this.totalCalories += this.data[type].calories;
+                  });
+              }
+
+              this.useUserActivitiesStore.fetchActivites(this.selectedDate);
+          } catch (err) {
+              console.log(err);
+          }
+      },
   },
-  mounted() {
-    this.selectedDay = this.currentDay;
+ mounted() {
+      this.generateDaysList();
+      this.generateWeekRange();
+      this.selectedDay = format(this.currentDate, 'yyyy-MM-dd');
+      this.selectedDate = this.selectedDay;
+      this.fetchData();
+      this.fetchCaloricDemand();
+     this.useUserActivitiesStore.fetchActivites(this.selectedDate)
+  },
+  watch: {
+      tab(newTab) {
+          this.selectedDay;
+      },
   },
 };
 </script>
@@ -77,4 +240,25 @@ export default {
   background-color: rgba(47, 125, 40, 0.5);
   color: white !important;
 }
+.totalCalories {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  color: #2f7d28;
+}
+.totalCaloriesValue {
+  /* font-weight: bold; */
+  font-size:20px;
+  font-weight: 350;
+}
+.additional_calories {
+  font-weight: 300;
+  color: grey;
+  font-size: smaller;
+}
+.totalCaloriesValue {
+  
+  gap: 20px
+}
+
 </style>

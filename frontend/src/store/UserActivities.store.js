@@ -1,14 +1,18 @@
-import { reactive, readonly } from 'vue';
+import { reactive, readonly, ref } from 'vue';
 import { fetchData } from '../../helpers/api'
 import {format} from "date-fns";
 
 export const store = reactive({
     activities: {},
-    caloriesBurned:{},
+    caloriesBurned: ref({}),
     userName: localStorage.getItem('login'),
 
     calculateCaloriesBurned(date){
-        if(!this.caloriesBurned[date] &&  this.activities[date]?.length>0 ){
+        if(!this.caloriesBurned[date]){
+            this.caloriesBurned[date]=0;
+        }
+
+        if(!this.caloriesBurned[date] && this.activities[date]?.length>0 ){
             for (let i = 0; i < this.activities[date].length; i++) {
                 this.caloriesBurned[date] += this.activities[date][i].calories;
             }
@@ -69,10 +73,11 @@ export const store = reactive({
      subtrackCaloriesBurned(calory,date){
         this.caloriesBurned[date]-=calory
      },
-     getCaloriesBurned(date){
+    async getCaloriesBurned(date){
         if(!this.caloriesBurned[date]){
-            this.fetchActivites(date)
+         await this.fetchActivites(date)
         }
+    
         return this.caloriesBurned[date]
      }
    });

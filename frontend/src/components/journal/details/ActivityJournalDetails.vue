@@ -36,15 +36,6 @@ v-for="(activity, index) in selectedActivities"
             name="Dodaj"
             @click="addActivity(this.duration, this.activitySelected.calories_on_hour, this.activitySelected.name)"
         ></submit-button>
-        <!-- <v-list lines="one">
-            <p>Dodane aktywności:</p>
-            <v-list-item
-                v-for="activity in activityList"
-                :key="`${activity.name}/${activity.calories}`"
-                :title="activity.name"
-                :subtitle="`${activity.calories}kcal, ${activity.duration}min`"
-            ></v-list-item>
-        </v-list> -->
     </reusable-modal>
 </template>
 
@@ -59,7 +50,6 @@ import SelectedActivity from "./SelectedActivityComponent.vue"
 import { ref } from 'vue';
 import { fetchData } from "../../../../helpers/api";
 
-import { getTodayDate } from "../../../../helpers/helpersFunctions";
 
 
 export default {
