@@ -6,7 +6,9 @@ Aplikacja FoodFit to wszechstronna aplikacja, która oferuje różnorodne funkcj
 
 # Szczegółowy opis techniczny:
 
-Użyte technologie: Vue, JavaScript, HTML, CSS
+Użyte technologie: Vue, JavaScript, HTML, CSS, Mongo DV
+
+biblioteki: Vuetify, Date-fns, Vue-charts, Mdi-icons
 
 ### 1. Ekran Rejestracji:
 Ekran ten umożliwia użytkownikowi rejestrację nowego konta. 
@@ -43,21 +45,23 @@ Logowanie do Istniejącego Konta:
 ### 3. Ekran Menu:
 Ekran ten wyświetla się po zalogowaniu do aplikacji. Znajdują się na nim przyciski służące nawigacji po aplikacji.
 #### Elementy Interfejsu:
-- Przycisk “Zapotrzebowanie kaloryczne”
 - Przycisk “Dziennik posiłków i aktywności”
+- Przycisk “Zapotrzebowanie kaloryczne”
+- Przycisk "Postępy"
 - Przycisk “Wyloguj”
 #### Funkcje:
 - Przyciski znajdujące się na ekranie, pozwalają użytkownikowi przenieść się do innych widoków. 
-- Użycie przycisku “Zapotrzebowanie kaloryczne” przenosi użytkownika do widoku z kalkulatorem kalorii, natomiast drugi przycisk przenosi użytkownika do widoku w którym można dodać posiłki oraz aktywności.
+- Użycie przycisku “Zapotrzebowanie kaloryczne” przenosi użytkownika do widoku z kalkulatorem kalorii, użycie przycisku “Dziennik posiłków i aktywności” przenosi użytkownika do widoku w którym można dodać posiłki oraz aktywności, użycie przycisku "Postępy" przenosi użytkownika do statystyk spalonych kcal.
 - Ostatni przycisk - “Wyloguj” przenosi użytkownika do ekranu logowania.
 ### 4. Ekran Kalkulator kalorii:
-Ekran ten zawiera narzędzie do obliczenia całkowitej przemiany materii oraz dziennego zapotrzebowania kalorycznego użytkownika. Dane obliczane są według specjalistycznych wzorów. Na wynik wpływ mają następujące parametry: płeć, wiek, waga, wzrost, poziom aktywności w pracy oraz w wolnym czasie i cel diety.
+Ekran ten zawiera narzędzie do obliczenia dziennego zapotrzebowania kalorycznego użytkownika. Dane obliczane są według specjalistycznych wzorów. Na wynik wpływ mają następujące parametry: płeć, wiek, waga, wzrost, poziom aktywności w pracy oraz w wolnym czasie i cel diety.
 #### Elementy Interfejsu:
 - Pola wejściowe, na dane niezbędne do obliczenia zapotrzebowania kalorycznego:
 - Przycisk “FoodFit”
 - Dropdown lista “płeć” 
 - Pola tekstowe do wprowadzenia wieku,  wagi i wzrostu 
 - Dropdown lista “poziom aktywności w pracy”
+- - Dropdown lista “poziom aktywności w wolnym czasie”
   ###### opcje do wyboru:
   - bardzo lekka - np. praca przed komputerem, kierowca
   - lekka - np. lekka praca przemysłowa, sprzedaż
@@ -115,3 +119,5 @@ W widoku wydzielone są dwie zakładki: “Posiłki” oraz “Aktywność”.
 - Użytkownik Klikając na “+” znajdujący się przy “Trening” dodaje nową pozycję. W polu tekstowym podaje nazwę aktywności oraz liczbę spalonych kalorii lub wybiera aktywność z gotowej bazy. Możliwe jest dodanie kilku aktywności. Możliwe jest również usunięcie lub edycja nazwy i liczby spalonych kalorii pozycji.
 - Z każdą nowo dodaną pozycją wartość pola “Liczba spalonych kalorii” zostaje zaktualizowana.
 
+### 6. Ekran "Postępy":
+Ekran umożliwia użytkownikowi wyświetlenie statystyk spalonych podczas wykonywania aktywności kalorii, na wykresie, dla każdego miesiąca.
