@@ -5,8 +5,10 @@ import {format} from "date-fns";
 export const store = reactive({
     activities: {},
     caloriesBurned: ref({}),
-    userName: localStorage.getItem('login'),
 
+    getUserName(){
+        return localStorage.getItem('login');
+    },
     calculateCaloriesBurned(date){
         if(!this.caloriesBurned[date]){
             this.caloriesBurned[date]=0;
@@ -22,7 +24,7 @@ export const store = reactive({
       if(!this.activities[date]?.length ){
         try {
             const response = await fetchData(
-                `http://localhost:3010/api/user-activities?userName=${this.userName}&date=${date}`,
+                `http://localhost:3010/api/user-activities?userName=${this.getUserName()}&date=${date}`,
         
             );
             this.activities[date] = response.activities;
@@ -50,12 +52,10 @@ export const store = reactive({
         const response = await fetchData(
             "http://localhost:3010/api/user-activities",
             "DELETE",
-            {userName:this.userName,activityId}
+            {userName:this.getUserName(),activityId}
         );
 
         if(response.status = '204'){
-            console.log(this.activities[date]);
-            console.log("activityID",activityId)
 
           this.caloriesBurned[date] -= this.activities[date].filter(({_id})=>_id ===activityId)[0].calories;
           this.activities[date] =  this.activities[date].filter(({_id})=>_id !==activityId);
@@ -73,12 +73,15 @@ export const store = reactive({
      subtrackCaloriesBurned(calory,date){
         this.caloriesBurned[date]-=calory
      },
+     clearStore(){
+        this.activities = {};
+        this.caloriesBurned = {};
+     },
     async getCaloriesBurned(date){
         if(!this.caloriesBurned[date]){
          await this.fetchActivites(date)
         }
     
         return this.caloriesBurned[date]
-     }
+     },
    });
-

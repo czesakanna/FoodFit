@@ -131,7 +131,6 @@ export default {
             weight: ref(""),
             mealType: "",
             user: "",
-            productList: [],
         };
     },
     methods: {
@@ -171,13 +170,7 @@ export default {
                     "POST",
                     mealToPost
                 );
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
 
-                const responseData = await response.json();
-
-                this.productList.push(responseData);
             } catch (err) {
                 console.error("Error adding ingredient to meals list:", err);
             } finally {
@@ -196,9 +189,6 @@ export default {
                     }
                 );
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
             } catch (error) {
                 console.error("Error removing meal:", error);
                 // Obsługa błędu, np. wyświetlenie komunikatu użytkownikowi

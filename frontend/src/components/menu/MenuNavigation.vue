@@ -22,7 +22,13 @@
 <script>
 import AppNameText from "../textComponents/AppNameText.vue";
 import MenuButton from "../buttons/MenuButton.vue";
+import { inject } from 'vue'
+
 export default {
+   setup() {
+   const useUserActivitiesStore = inject('userActivitiesStore'); //pobranie kontekstu 
+   return { useUserActivitiesStore };
+ },
     components: {
         "app-name": AppNameText,
         "menu-btn": MenuButton,
@@ -31,6 +37,7 @@ export default {
         logout() {
             localStorage.clear();
             this.$router.push("/");
+            this.useUserActivitiesStore.clearStore();
         },
     },
 };

@@ -15,7 +15,6 @@ const userSchema = new Schema({
     meals: [UsersMealsSchema],
     caloricDemand: {
         type: Number,
-        required:true,
     }
 });
 

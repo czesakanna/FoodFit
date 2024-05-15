@@ -10,6 +10,10 @@ export const fetchData = async (url, method = "GET", data = {}) => {
             throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
 
+        if(response.status ===204){
+            return;
+        }
+
         const responseData = await response.json();
         return responseData;
     } catch (error) {
@@ -36,8 +40,7 @@ export const checkAndRegister = async (
                 console.log("użytkownik istnieje w bazie, zaloguj się");
                 updateProps({
                     show: true,
-                    color: "error",
-                    icon: "$error",
+                    color: "red",
                     title: "Wystąpił błąd.",
                     text: "Taki użytkownik już istnieje, spróbuj się zalogować.",
                 });
@@ -46,8 +49,7 @@ export const checkAndRegister = async (
                 await fetchData(url, "POST", data);
                 updateProps({
                     show: true,
-                    color: "success",
-                    icon: "$success",
+                    color: "green",
                     title: "Udało się.",
                     text: "Użytkownik został zarejestrowany.",
                 });
@@ -83,8 +85,6 @@ export const checkAndLogin = async (
             } else {
                 updateProps({
                     show: true,
-                    color: "error",
-                    icon: "$error",
                     text: "Wystąpił błąd..",
                     color: "red",
                     title: "Dane logowania są niepoprawne.",
