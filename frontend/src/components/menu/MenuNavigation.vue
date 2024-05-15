@@ -10,8 +10,9 @@
             <router-link to="/zapotrzebowanie_kaloryczne">
                 <menu-btn name="Zapotrzebowanie kaloryczne"></menu-btn>
             </router-link>
-            
-            <menu-btn name="Postępy"></menu-btn>
+            <router-link to="/postepy">
+                <menu-btn name="Postępy"></menu-btn
+            ></router-link>
             
             <menu-btn name="Wyloguj" @click="logout"></menu-btn>
         </div>

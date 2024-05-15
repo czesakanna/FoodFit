@@ -33,6 +33,12 @@ const router = createRouter({
             meta: { requiresAuth: true }, // Oznacz trasę, która wymaga autoryzacji
 
         },
+        {
+            path: '/postepy',
+            name: 'ProgressionView',
+            component: () => import('./views/ProgressionView.vue'),
+            meta: { requiresAuth: true }, // Oznacz trasę, która wymaga autoryzacji}
+        },
     ],
 });
 

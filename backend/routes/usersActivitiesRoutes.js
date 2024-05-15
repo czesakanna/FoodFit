@@ -15,14 +15,19 @@ router.get("/", async (req, res) => {
             return res.status(404).json({ data: "uztykownik nie istnieje" });
         }
 
-        console.log("DATE", date);
+        console.log('DATE', date);
 
-        const matchingActivities = user.activities.filter((activity) => {
-            return (
-                new Date(activity.date).toDateString() ===
-                new Date(date).toDateString()
-            );
-        });
+        let matchingActivities;
+        if (date) {
+            matchingActivities = user.activities.filter((activity) => {
+                return (
+                    new Date(activity.date).toDateString() ===
+                    new Date(date).toDateString()
+                );
+            });
+        } else {
+            matchingActivities = user.activities;
+        }
 
         console.log("matchingActivities", matchingActivities);
 
